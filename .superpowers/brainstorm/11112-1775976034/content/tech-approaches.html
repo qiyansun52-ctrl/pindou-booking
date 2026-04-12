@@ -1,0 +1,90 @@
+<h2>技术方案对比</h2>
+<p class="subtitle">3 种方案各有取舍，推荐方案 A</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)" style="border:2px solid var(--accent);">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>推荐：Next.js + Supabase</h3>
+      <p style="margin-bottom:12px;">一个 Next.js 项目搞定前后端，Supabase 提供数据库 + 实时同步 + 认证</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>一个代码仓库，顾客页和后台都在里面</li>
+            <li>Supabase 实时订阅 — 座位状态自动同步</li>
+            <li>免费额度足够小店使用</li>
+            <li>部署简单（Vercel 一键部署）</li>
+            <li>后台登录认证开箱即用</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>需要学 React/Next.js（如不熟悉）</li>
+            <li>依赖第三方服务（Supabase）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Vue + Node.js + MongoDB</h3>
+      <p style="margin-bottom:12px;">前端 Vue，后端 Express API，数据库 MongoDB Atlas</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>前后端分离，结构清晰</li>
+            <li>Vue 对中文开发者更友好</li>
+            <li>完全掌控后端逻辑</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>需要维护两个项目（前端+后端）</li>
+            <li>实时同步需要自己用 WebSocket 实现</li>
+            <li>部署更复杂，需要分别部署前后端</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>纯静态 + Firebase</h3>
+      <p style="margin-bottom:12px;">纯 HTML/JS 页面 + Firebase 后端服务</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>最简单，不需要框架知识</li>
+            <li>Firebase 实时数据库自带同步</li>
+            <li>托管免费</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>代码量大了以后难维护</li>
+            <li>没有服务端渲染，SEO 差（分享链接预览不好看）</li>
+            <li>复杂逻辑（冲突检测）放在前端不安全</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;padding:16px;background:var(--bg-secondary);border-radius:8px;">
+  <h3 style="margin-top:0;">为什么推荐方案 A？</h3>
+  <p style="color:var(--text-primary);line-height:1.8;">
+    你的核心需求是<strong>实时座位同步</strong>和<strong>冲突检测</strong>。Supabase 的实时订阅天然解决同步问题，冲突检测逻辑可以写在 Next.js API 路由里（服务端执行，安全可靠）。一个项目管前后端，Vercel 免费部署，对于 4 座位的小店来说，免费额度绰绰有余。
+  </p>
+</div>

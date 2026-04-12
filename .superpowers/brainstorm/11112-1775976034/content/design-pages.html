@@ -1,0 +1,164 @@
+<h2>设计 — 第 2 节：页面结构与用户流程</h2>
+<p class="subtitle">顾客端 3 个页面 + 管理后台 4 个页面</p>
+
+<div class="section">
+  <h3>顾客端（H5 网页，无需登录）</h3>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:28px;height:28px;border-radius:6px;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">1</div>
+        <h3 style="margin:0;font-size:16px;">首页 — 选择日期</h3>
+        <code style="font-size:12px;color:var(--text-secondary);">/</code>
+      </div>
+      <ul style="color:var(--text-primary);line-height:1.8;margin:0;">
+        <li>店铺名称和简介</li>
+        <li>日历组件，显示哪些日期可预约（绿色）/ 已满（灰色）/ 未开放（不可点击）</li>
+        <li>点击日期进入下一步</li>
+      </ul>
+    </div>
+
+    <div style="display:flex;justify-content:center;">
+      <div style="color:var(--text-secondary);font-size:20px;">↓</div>
+    </div>
+
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:28px;height:28px;border-radius:6px;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">2</div>
+        <h3 style="margin:0;font-size:16px;">预约表单 — 选时间填信息</h3>
+        <code style="font-size:12px;color:var(--text-secondary);">/book?date=2026-04-15</code>
+      </div>
+      <ul style="color:var(--text-primary);line-height:1.8;margin:0;">
+        <li>顶部显示所选日期和剩余座位概览</li>
+        <li>时间轴：可视化显示每个小时的座位占用情况（如 4/4 已满标红）</li>
+        <li>选择开始时间（下拉/点击时间轴）</li>
+        <li>选择时长（1/2/3... 小时）</li>
+        <li>选择人数（1-4 人）</li>
+        <li>实时显示价格：首小时 9.9 + 后续 19.9/小时 × 人数</li>
+        <li>填写姓名</li>
+        <li>选择联系方式类型（微信 / WhatsApp）+ 填写号码</li>
+        <li>提交预约按钮</li>
+      </ul>
+    </div>
+
+    <div style="display:flex;justify-content:center;">
+      <div style="color:var(--text-secondary);font-size:20px;">↓</div>
+    </div>
+
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:28px;height:28px;border-radius:6px;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">3</div>
+        <h3 style="margin:0;font-size:16px;">预约状态页</h3>
+        <code style="font-size:12px;color:var(--text-secondary);">/booking/{id}</code>
+      </div>
+      <ul style="color:var(--text-primary);line-height:1.8;margin:0;">
+        <li>显示预约详情（日期、时间、人数、价格）</li>
+        <li>实时状态：⏳ 待确认 → ✅ 已确认 / ❌ 已拒绝</li>
+        <li>Supabase 实时订阅，店家操作后顾客页面自动更新</li>
+        <li>提交成功后返回此页面的链接，顾客可保存</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h3>管理后台（需登录，移动端优先）</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:#10b981;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;">📋</div>
+        <h3 style="margin:0;font-size:15px;">预约列表</h3>
+      </div>
+      <code style="font-size:11px;color:var(--text-secondary);">/admin</code>
+      <ul style="color:var(--text-secondary);font-size:13px;line-height:1.8;margin:8px 0 0;">
+        <li>今日预约卡片列表</li>
+        <li>按日期筛选</li>
+        <li>按状态筛选</li>
+        <li>一键确认/拒绝/取消</li>
+        <li>新预约实时推送提醒</li>
+      </ul>
+    </div>
+
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:#6366f1;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;">📅</div>
+        <h3 style="margin:0;font-size:15px;">时间管理</h3>
+      </div>
+      <code style="font-size:11px;color:var(--text-secondary);">/admin/slots</code>
+      <ul style="color:var(--text-secondary);font-size:13px;line-height:1.8;margin:8px 0 0;">
+        <li>日历视图选择日期</li>
+        <li>设置开放时间范围</li>
+        <li>快捷操作：批量设置一周</li>
+        <li>启用/停用某天</li>
+      </ul>
+    </div>
+
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:#f59e0b;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;">📊</div>
+        <h3 style="margin:0;font-size:15px;">数据统计</h3>
+      </div>
+      <code style="font-size:11px;color:var(--text-secondary);">/admin/stats</code>
+      <ul style="color:var(--text-secondary);font-size:13px;line-height:1.8;margin:8px 0 0;">
+        <li>今日/本周/本月人数</li>
+        <li>今日/本周/本月收入</li>
+        <li>简单图表展示趋势</li>
+      </ul>
+    </div>
+
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:#ef4444;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;">🔑</div>
+        <h3 style="margin:0;font-size:15px;">登录页</h3>
+      </div>
+      <code style="font-size:11px;color:var(--text-secondary);">/admin/login</code>
+      <ul style="color:var(--text-secondary);font-size:13px;line-height:1.8;margin:8px 0 0;">
+        <li>邮箱 + 密码登录</li>
+        <li>Supabase Auth 处理</li>
+        <li>登录后跳转预约列表</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="padding:16px;background:var(--bg-secondary);border-radius:8px;">
+  <h3 style="margin-top:0;">项目目录结构</h3>
+  <pre style="color:var(--text-primary);font-size:13px;line-height:1.8;margin:0;overflow-x:auto;">
+pindou-booking/
+├── app/
+│   ├── page.tsx              # 顾客首页（选日期）
+│   ├── book/page.tsx         # 预约表单
+│   ├── booking/[id]/page.tsx # 预约状态
+│   └── admin/
+│       ├── page.tsx          # 预约列表
+│       ├── slots/page.tsx    # 时间管理
+│       ├── stats/page.tsx    # 数据统计
+│       └── login/page.tsx    # 登录
+├── components/               # 共享组件
+├── lib/
+│   ├── supabase.ts           # Supabase 客户端
+│   └── pricing.ts            # 价格计算逻辑
+└── app/api/
+    └── bookings/route.ts     # 预约 API（含冲突检测）
+  </pre>
+</div>
+
+<div class="options" style="margin-top:24px;">
+  <div class="option" data-choice="ok" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>页面结构没问题</h3>
+      <p>继续看下一节</p>
+    </div>
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>需要调整</h3>
+      <p>有页面要增减或流程要修改</p>
+    </div>
+  </div>
+</div>

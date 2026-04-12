@@ -1,0 +1,86 @@
+<h2>拼豆店预约系统 — 需求概览</h2>
+<p class="subtitle">请确认以下信息是否准确</p>
+
+<div class="section">
+  <h3>基本信息</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div class="label">座位数</div>
+      <div style="font-size:24px;font-weight:700;color:var(--text-primary);">4 个</div>
+    </div>
+    <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+      <div class="label">收费标准</div>
+      <div style="font-size:16px;font-weight:700;color:var(--text-primary);">19.9 RM/人/小时</div>
+      <div style="font-size:13px;color:var(--text-secondary);">开业特惠首小时 9.9 RM</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>顾客端（H5 网页）</h3>
+  <ul style="line-height:2;color:var(--text-primary);">
+    <li>通过 WhatsApp 分享链接访问</li>
+    <li>选择 <strong>日期</strong> → 查看实时空闲/不可预约时间</li>
+    <li>选择 <strong>开始时间</strong> + <strong>时长</strong>（几小时）</li>
+    <li>选择 <strong>人数</strong>（占座位数）</li>
+    <li>填写 <strong>姓名</strong> + <strong>WhatsApp 号码</strong></li>
+    <li>提交后等待店家确认</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>管理后台（移动端优先）</h3>
+  <ul style="line-height:2;color:var(--text-primary);">
+    <li><strong>开放时间管理</strong> — 手动设置哪些日期/时间段可预约</li>
+    <li><strong>预约管理</strong> — 查看全部预约，手动确认/拒绝/取消/修改</li>
+    <li><strong>冲突检测</strong> — 自动检测座位和时间冲突</li>
+    <li><strong>数据统计</strong> — 每日预约人数 + 收入统计</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>预约流程</h3>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div style="color:var(--text-primary);">店家在后台设置可预约的时间段</div>
+    </div>
+    <div style="width:2px;height:12px;background:var(--border);margin-left:15px;"></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div style="color:var(--text-primary);">顾客打开 H5 页面，查看实时可用时间</div>
+    </div>
+    <div style="width:2px;height:12px;background:var(--border);margin-left:15px;"></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div style="color:var(--text-primary);">顾客选择时间、人数，填写信息并提交</div>
+    </div>
+    <div style="width:2px;height:12px;background:var(--border);margin-left:15px;"></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+      <div style="color:var(--text-primary);">店家收到通知，在后台确认或拒绝</div>
+    </div>
+    <div style="width:2px;height:12px;background:var(--border);margin-left:15px;"></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">5</div>
+      <div style="color:var(--text-primary);">顾客在页面上查看预约状态（待确认/已确认/已拒绝）</div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="correct" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>确认无误</h3>
+      <p>以上信息都对，可以继续</p>
+    </div>
+  </div>
+  <div class="option" data-choice="changes" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>需要修改</h3>
+      <p>有些地方需要补充或调整</p>
+    </div>
+  </div>
+</div>

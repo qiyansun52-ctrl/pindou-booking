@@ -1,0 +1,144 @@
+<h2>设计 — 第 3 节：技术架构与部署</h2>
+<p class="subtitle">整体架构、UI 风格、定价逻辑和部署方案</p>
+
+<div class="section">
+  <h3>整体架构</h3>
+  <div style="background:var(--bg-secondary);padding:20px;border-radius:8px;">
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="display:flex;gap:12px;width:100%;">
+        <div style="flex:1;background:white;border:2px solid #10b981;border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-weight:700;color:#10b981;font-size:13px;margin-bottom:4px;">顾客端 H5</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Next.js Pages</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">首页 / 预约 / 状态</div>
+        </div>
+        <div style="flex:1;background:white;border:2px solid #6366f1;border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-weight:700;color:#6366f1;font-size:13px;margin-bottom:4px;">管理后台</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Next.js Pages + Auth</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">预约 / 时间 / 统计</div>
+        </div>
+      </div>
+      <div style="color:var(--text-secondary);font-size:16px;">↕ API Routes</div>
+      <div style="width:100%;background:white;border:2px solid #f59e0b;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-weight:700;color:#f59e0b;font-size:13px;margin-bottom:4px;">Next.js API</div>
+        <div style="font-size:12px;color:var(--text-secondary);">预约提交 · 冲突检测 · 价格计算 · 状态管理</div>
+      </div>
+      <div style="color:var(--text-secondary);font-size:16px;">↕</div>
+      <div style="width:100%;background:white;border:2px solid #ef4444;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-weight:700;color:#ef4444;font-size:13px;margin-bottom:4px;">Supabase</div>
+        <div style="font-size:12px;color:var(--text-secondary);">PostgreSQL 数据库 · 实时订阅 · Auth 认证</div>
+      </div>
+      <div style="color:var(--text-secondary);font-size:16px;">↕</div>
+      <div style="width:100%;background:white;border:2px solid #8b5cf6;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-weight:700;color:#8b5cf6;font-size:13px;margin-bottom:4px;">Vercel</div>
+        <div style="font-size:12px;color:var(--text-secondary);">免费部署 · 自动 HTTPS · 全球 CDN</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>UI 设计风格（参考海报）</h3>
+  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div>
+        <div class="label">主色调</div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <div style="width:36px;height:36px;border-radius:6px;background:#D32F2F;border:1px solid rgba(0,0,0,0.1);" title="红色强调"></div>
+          <div style="width:36px;height:36px;border-radius:6px;background:#F5F0EB;border:1px solid rgba(0,0,0,0.1);" title="浅灰暖底"></div>
+          <div style="width:36px;height:36px;border-radius:6px;background:#333333;border:1px solid rgba(0,0,0,0.1);" title="深色文字"></div>
+          <div style="width:36px;height:36px;border-radius:6px;background:#FFFFFF;border:1px solid rgba(0,0,0,0.1);" title="白色卡片"></div>
+        </div>
+      </div>
+      <div>
+        <div class="label">风格关键词</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+          <span style="background:#D32F2F;color:white;padding:4px 10px;border-radius:4px;font-size:12px;">像素风</span>
+          <span style="background:#333;color:white;padding:4px 10px;border-radius:4px;font-size:12px;">可爱</span>
+          <span style="background:#666;color:white;padding:4px 10px;border-radius:4px;font-size:12px;">活泼</span>
+          <span style="background:#999;color:white;padding:4px 10px;border-radius:4px;font-size:12px;">简洁</span>
+        </div>
+      </div>
+    </div>
+    <ul style="color:var(--text-primary);line-height:1.8;margin:0;font-size:14px;">
+      <li>浅灰暖色纹理背景，白色卡片承载内容</li>
+      <li>红色作为 CTA 按钮和促销信息的强调色</li>
+      <li>可考虑在页面点缀像素风装饰元素</li>
+      <li>整体干净简洁，移动端友好的大按钮、大文字</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <h3>定价逻辑</h3>
+  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border);">
+          <th style="text-align:left;padding:8px;color:var(--text-secondary);">时长</th>
+          <th style="text-align:left;padding:8px;color:var(--text-secondary);">单人价格</th>
+          <th style="text-align:left;padding:8px;color:var(--text-secondary);">开业特惠（首小时 -10 RM）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px;color:var(--text-primary);font-weight:600;">1 小时</td>
+          <td style="padding:8px;color:var(--text-primary);">19.9 RM</td>
+          <td style="padding:8px;color:#D32F2F;font-weight:600;">9.9 RM</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px;color:var(--text-primary);font-weight:600;">2 小时</td>
+          <td style="padding:8px;color:var(--text-primary);">36.6 RM</td>
+          <td style="padding:8px;color:#D32F2F;font-weight:600;">26.6 RM</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;color:var(--text-primary);font-weight:600;">3 小时</td>
+          <td style="padding:8px;color:var(--text-primary);">49.9 RM</td>
+          <td style="padding:8px;color:#D32F2F;font-weight:600;">39.9 RM</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
+      总价 = 单人套餐价 × 人数。开业特惠通过后台开关控制是否启用。<br>
+      顾客只能选 1/2/3 小时，超过 3 小时到店线下结算。
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <h3>技术栈清单</h3>
+  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px;">
+      <span style="color:var(--text-secondary);">框架</span>
+      <span style="color:var(--text-primary);font-weight:600;">Next.js 14 (App Router)</span>
+      <span style="color:var(--text-secondary);">UI</span>
+      <span style="color:var(--text-primary);font-weight:600;">Tailwind CSS + shadcn/ui</span>
+      <span style="color:var(--text-secondary);">数据库</span>
+      <span style="color:var(--text-primary);font-weight:600;">Supabase (PostgreSQL)</span>
+      <span style="color:var(--text-secondary);">认证</span>
+      <span style="color:var(--text-primary);font-weight:600;">Supabase Auth</span>
+      <span style="color:var(--text-secondary);">实时</span>
+      <span style="color:var(--text-primary);font-weight:600;">Supabase Realtime</span>
+      <span style="color:var(--text-secondary);">部署</span>
+      <span style="color:var(--text-primary);font-weight:600;">Vercel（免费）</span>
+      <span style="color:var(--text-secondary);">语言</span>
+      <span style="color:var(--text-primary);font-weight:600;">TypeScript</span>
+    </div>
+  </div>
+</div>
+
+<div class="options" style="margin-top:24px;">
+  <div class="option" data-choice="ok" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>架构设计没问题</h3>
+      <p>整体设计全部确认，可以写设计文档了</p>
+    </div>
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>需要调整</h3>
+      <p>有些地方需要修改</p>
+    </div>
+  </div>
+</div>

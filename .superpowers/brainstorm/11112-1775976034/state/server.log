@@ -1,0 +1,22 @@
+{"type":"server-started","port":63668,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:63668","screen_dir":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/content","state_dir":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/state"}
+{"type":"screen-added","file":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/content/requirements-overview.html"}
+{"source":"user-event","type":"click","text":"B\n    \n      需要修改\n      有些地方需要补充或调整","choice":"changes","id":null,"timestamp":1775977801310}
+{"source":"user-event","type":"click","text":"B\n    \n      需要修改\n      有些地方需要补充或调整","choice":"changes","id":null,"timestamp":1775977812475}
+{"source":"user-event","type":"click","text":"B\n    \n      需要修改\n      有些地方需要补充或调整","choice":"changes","id":null,"timestamp":1775977812642}
+{"source":"user-event","type":"click","text":"A\n    \n      确认无误\n      以上信息都对，可以继续","choice":"correct","id":null,"timestamp":1775977813242}
+{"source":"user-event","type":"click","text":"B\n    \n      需要修改\n      有些地方需要补充或调整","choice":"changes","id":null,"timestamp":1775977813808}
+{"source":"user-event","type":"click","text":"B\n    \n      需要修改\n      有些地方需要补充或调整","choice":"changes","id":null,"timestamp":1775977814025}
+{"source":"user-event","type":"click","text":"A\n    \n      确认无误\n      以上信息都对，可以继续","choice":"correct","id":null,"timestamp":1775977814675}
+{"source":"user-event","type":"click","text":"B\n    \n      需要修改\n      有些地方需要补充或调整","choice":"changes","id":null,"timestamp":1775977815158}
+{"type":"screen-added","file":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/content/tech-approaches.html"}
+{"type":"screen-added","file":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/content/design-data-model.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      数据模型没问题\n      继续看下一节","choice":"ok","id":null,"timestamp":1775978123259}
+{"type":"screen-added","file":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/content/design-pages.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      页面结构没问题\n      继续看下一节","choice":"ok","id":null,"timestamp":1775978240176}
+{"type":"screen-added","file":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/content/design-architecture.html"}
+{"type":"screen-added","file":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/content/spec-review.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      确认通过\n      没问题，开始制定实施计划","choice":"approve","id":null,"timestamp":1775979160209}
+{"source":"user-event","type":"click","text":"A\n    \n      确认通过\n      没问题，开始制定实施计划","choice":"approve","id":null,"timestamp":1775979161259}
+{"source":"user-event","type":"click","text":"A\n    \n      确认通过\n      没问题，开始制定实施计划","choice":"approve","id":null,"timestamp":1775979161442}
+{"source":"user-event","type":"click","text":"A\n    \n      确认通过\n      没问题，开始制定实施计划","choice":"approve","id":null,"timestamp":1775979163591}
+{"type":"screen-added","file":"/Users/gabriel/pindou-booking/.superpowers/brainstorm/11112-1775976034/content/waiting.html"}

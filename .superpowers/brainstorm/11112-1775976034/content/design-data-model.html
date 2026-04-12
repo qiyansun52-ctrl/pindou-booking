@@ -1,0 +1,190 @@
+<h2>设计 — 第 1 节：数据模型</h2>
+<p class="subtitle">Supabase PostgreSQL 数据库表设计</p>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">表 1：available_slots（可预约时间段）</div>
+    <div class="mockup-body" style="padding:16px;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">字段</th>
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">类型</th>
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--accent);font-weight:600;">id</td>
+            <td style="padding:8px;color:var(--text-primary);">UUID</td>
+            <td style="padding:8px;color:var(--text-secondary);">主键</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">date</td>
+            <td style="padding:8px;color:var(--text-primary);">DATE</td>
+            <td style="padding:8px;color:var(--text-secondary);">日期，如 2026-04-15</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">start_time</td>
+            <td style="padding:8px;color:var(--text-primary);">TIME</td>
+            <td style="padding:8px;color:var(--text-secondary);">开放开始时间，如 10:00</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">end_time</td>
+            <td style="padding:8px;color:var(--text-primary);">TIME</td>
+            <td style="padding:8px;color:var(--text-secondary);">开放结束时间，如 20:00</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">is_active</td>
+            <td style="padding:8px;color:var(--text-primary);">BOOLEAN</td>
+            <td style="padding:8px;color:var(--text-secondary);">是否启用</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
+        店家设置某天的营业时间。比如 4 月 15 日 10:00-20:00 开放预约。顾客只能在这个范围内选择开始时间。
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">表 2：bookings（预约记录）</div>
+    <div class="mockup-body" style="padding:16px;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">字段</th>
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">类型</th>
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--accent);font-weight:600;">id</td>
+            <td style="padding:8px;color:var(--text-primary);">UUID</td>
+            <td style="padding:8px;color:var(--text-secondary);">主键</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">slot_id</td>
+            <td style="padding:8px;color:var(--text-primary);">UUID → available_slots</td>
+            <td style="padding:8px;color:var(--text-secondary);">关联哪天的开放时间</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">customer_name</td>
+            <td style="padding:8px;color:var(--text-primary);">TEXT</td>
+            <td style="padding:8px;color:var(--text-secondary);">顾客姓名</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">contact_type</td>
+            <td style="padding:8px;color:var(--text-primary);">ENUM</td>
+            <td style="padding:8px;color:var(--text-secondary);">'wechat' 或 'whatsapp'</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">contact_value</td>
+            <td style="padding:8px;color:var(--text-primary);">TEXT</td>
+            <td style="padding:8px;color:var(--text-secondary);">微信号或 WhatsApp 号码</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">start_time</td>
+            <td style="padding:8px;color:var(--text-primary);">TIMESTAMPTZ</td>
+            <td style="padding:8px;color:var(--text-secondary);">预约开始时间</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">duration_hours</td>
+            <td style="padding:8px;color:var(--text-primary);">INTEGER</td>
+            <td style="padding:8px;color:var(--text-secondary);">预约时长（小时）</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">num_people</td>
+            <td style="padding:8px;color:var(--text-primary);">INTEGER</td>
+            <td style="padding:8px;color:var(--text-secondary);">人数（1-4）</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">total_price</td>
+            <td style="padding:8px;color:var(--text-primary);">DECIMAL</td>
+            <td style="padding:8px;color:var(--text-secondary);">自动计算的总价（马币）</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">status</td>
+            <td style="padding:8px;color:var(--text-primary);">ENUM</td>
+            <td style="padding:8px;color:var(--text-secondary);">pending / confirmed / rejected / cancelled</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">created_at</td>
+            <td style="padding:8px;color:var(--text-primary);">TIMESTAMPTZ</td>
+            <td style="padding:8px;color:var(--text-secondary);">创建时间</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">表 3：admin_users（管理员）</div>
+    <div class="mockup-body" style="padding:16px;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">字段</th>
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">类型</th>
+            <th style="text-align:left;padding:8px;color:var(--text-secondary);">说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--accent);font-weight:600;">id</td>
+            <td style="padding:8px;color:var(--text-primary);">UUID</td>
+            <td style="padding:8px;color:var(--text-secondary);">关联 Supabase Auth 用户 ID</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">email</td>
+            <td style="padding:8px;color:var(--text-primary);">TEXT</td>
+            <td style="padding:8px;color:var(--text-secondary);">登录邮箱</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;color:var(--text-primary);font-weight:600;">name</td>
+            <td style="padding:8px;color:var(--text-primary);">TEXT</td>
+            <td style="padding:8px;color:var(--text-secondary);">管理员名称</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
+        使用 Supabase Auth 进行登录认证，只有 admin_users 表中的用户才能访问后台。
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="padding:16px;background:var(--bg-secondary);border-radius:8px;">
+  <h3 style="margin-top:0;">冲突检测逻辑</h3>
+  <p style="color:var(--text-primary);line-height:1.8;margin-bottom:8px;">
+    当顾客提交预约时，API 在服务端执行以下检查：
+  </p>
+  <ol style="color:var(--text-primary);line-height:2;">
+    <li>计算预约的时间范围：<code>start_time</code> 到 <code>start_time + duration_hours</code></li>
+    <li>查询该时间范围内所有 <strong>pending + confirmed</strong> 状态的预约</li>
+    <li>按每个小时统计已占座位数</li>
+    <li>如果任何小时内 <strong>已占座位 + 本次人数 > 4</strong>，则拒绝预约</li>
+  </ol>
+</div>
+
+<div class="options" style="margin-top:24px;">
+  <div class="option" data-choice="ok" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>数据模型没问题</h3>
+      <p>继续看下一节</p>
+    </div>
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>需要调整</h3>
+      <p>有字段要增减或逻辑要修改</p>
+    </div>
+  </div>
+</div>

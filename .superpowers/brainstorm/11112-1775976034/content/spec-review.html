@@ -1,0 +1,249 @@
+<h2>设计文档审阅</h2>
+<p class="subtitle">docs/superpowers/specs/2026-04-12-pinsland-booking-design.md</p>
+
+<div class="section">
+  <h3>概述</h3>
+  <p style="color:var(--text-primary);line-height:1.8;">
+    为拼豆岛（PINSLAND）构建一套线上预约系统，包含顾客端 H5 网页和管理后台。顾客通过 WhatsApp 分享的链接进入预约页面，选择时间和人数后提交预约，店家在后台审核确认。
+  </p>
+</div>
+
+<div class="section">
+  <h3>业务背景</h3>
+  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;line-height:2;color:var(--text-primary);">
+    <strong>品牌：</strong>拼豆岛 PINSLAND（SHERVIE ART）<br>
+    <strong>地址：</strong>JAYAONE | UM，Pacific Star<br>
+    <strong>微信：</strong>PINSLAND<br>
+    <strong>座位数：</strong>4 个<br>
+    <strong>收费：</strong>线下结算（1h 19.9 RM / 2h 36.6 RM / 3h 49.9 RM，开业特惠首小时 9.9 RM）<br>
+    <strong>系统不处理价格计算</strong>，仅负责预约和座位管理，收入由店家手动录入
+  </div>
+</div>
+
+<div class="section">
+  <h3>技术选型</h3>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px;background:var(--bg-secondary);padding:16px;border-radius:8px;">
+    <span style="color:var(--text-secondary);">框架</span><span style="color:var(--text-primary);font-weight:600;">Next.js 14 (App Router)</span>
+    <span style="color:var(--text-secondary);">UI</span><span style="color:var(--text-primary);font-weight:600;">Tailwind CSS + shadcn/ui</span>
+    <span style="color:var(--text-secondary);">数据库</span><span style="color:var(--text-primary);font-weight:600;">Supabase (PostgreSQL)</span>
+    <span style="color:var(--text-secondary);">认证</span><span style="color:var(--text-primary);font-weight:600;">Supabase Auth</span>
+    <span style="color:var(--text-secondary);">实时</span><span style="color:var(--text-primary);font-weight:600;">Supabase Realtime</span>
+    <span style="color:var(--text-secondary);">部署</span><span style="color:var(--text-primary);font-weight:600;">Vercel（免费）</span>
+    <span style="color:var(--text-secondary);">语言</span><span style="color:var(--text-primary);font-weight:600;">TypeScript</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>数据模型</h3>
+
+  <div style="margin-bottom:16px;">
+    <div style="font-weight:600;color:var(--accent);margin-bottom:8px;">表 1：available_slots（可预约时间段）</div>
+    <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;color:var(--accent);font-weight:600;">id</td><td style="padding:6px;color:var(--text-primary);">UUID</td><td style="padding:6px;color:var(--text-secondary);">主键</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">date</td><td style="padding:6px;color:var(--text-primary);">DATE</td><td style="padding:6px;color:var(--text-secondary);">日期</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">start_time</td><td style="padding:6px;color:var(--text-primary);">TIME</td><td style="padding:6px;color:var(--text-secondary);">开放开始时间</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">end_time</td><td style="padding:6px;color:var(--text-primary);">TIME</td><td style="padding:6px;color:var(--text-secondary);">开放结束时间</td>
+        </tr>
+        <tr>
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">is_active</td><td style="padding:6px;color:var(--text-primary);">BOOLEAN</td><td style="padding:6px;color:var(--text-secondary);">是否启用</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-bottom:16px;">
+    <div style="font-weight:600;color:var(--accent);margin-bottom:8px;">表 2：bookings（预约记录）</div>
+    <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;color:var(--accent);font-weight:600;">id</td><td style="padding:6px;color:var(--text-primary);">UUID</td><td style="padding:6px;color:var(--text-secondary);">主键</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">slot_id</td><td style="padding:6px;color:var(--text-primary);">UUID</td><td style="padding:6px;color:var(--text-secondary);">关联 available_slots</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">customer_name</td><td style="padding:6px;color:var(--text-primary);">TEXT</td><td style="padding:6px;color:var(--text-secondary);">顾客姓名</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">contact_type</td><td style="padding:6px;color:var(--text-primary);">ENUM</td><td style="padding:6px;color:var(--text-secondary);">'wechat' 或 'whatsapp'</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">contact_value</td><td style="padding:6px;color:var(--text-primary);">TEXT</td><td style="padding:6px;color:var(--text-secondary);">微信号或 WA 号码</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">start_time</td><td style="padding:6px;color:var(--text-primary);">TIMESTAMPTZ</td><td style="padding:6px;color:var(--text-secondary);">预约开始时间</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">duration_hours</td><td style="padding:6px;color:var(--text-primary);">INTEGER</td><td style="padding:6px;color:var(--text-secondary);">预约时长（小时，不限上限）</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">num_people</td><td style="padding:6px;color:var(--text-primary);">INTEGER</td><td style="padding:6px;color:var(--text-secondary);">人数（1-4）</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">actual_amount</td><td style="padding:6px;color:var(--text-primary);">DECIMAL</td><td style="padding:6px;color:var(--text-secondary);">实际收款（店家手动录入）</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">status</td><td style="padding:6px;color:var(--text-primary);">ENUM</td><td style="padding:6px;color:var(--text-secondary);">pending / confirmed / rejected / cancelled</td>
+        </tr>
+        <tr>
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">created_at</td><td style="padding:6px;color:var(--text-primary);">TIMESTAMPTZ</td><td style="padding:6px;color:var(--text-secondary);">创建时间</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div>
+    <div style="font-weight:600;color:var(--accent);margin-bottom:8px;">表 3：admin_users（管理员）</div>
+    <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;color:var(--accent);font-weight:600;">id</td><td style="padding:6px;color:var(--text-primary);">UUID</td><td style="padding:6px;color:var(--text-secondary);">关联 Supabase Auth</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">email</td><td style="padding:6px;color:var(--text-primary);">TEXT</td><td style="padding:6px;color:var(--text-secondary);">登录邮箱</td>
+        </tr>
+        <tr>
+          <td style="padding:6px;font-weight:600;color:var(--text-primary);">name</td><td style="padding:6px;color:var(--text-primary);">TEXT</td><td style="padding:6px;color:var(--text-secondary);">管理员名称</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>冲突检测逻辑</h3>
+  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+    <ol style="color:var(--text-primary);line-height:2;margin:0;padding-left:20px;">
+      <li>计算预约时间范围：start_time 到 start_time + duration_hours</li>
+      <li>查询该范围内所有 pending + confirmed 状态的预约</li>
+      <li>按每个小时统计已占座位数</li>
+      <li>如果任何小时内「已占座位 + 本次人数 > 4」，拒绝并提示座位不足</li>
+    </ol>
+  </div>
+</div>
+
+<div class="section">
+  <h3>页面结构</h3>
+
+  <div style="margin-bottom:16px;">
+    <div style="font-weight:600;color:#10b981;margin-bottom:8px;">顾客端（H5，无需登录）</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;">
+        <div style="font-weight:600;color:var(--text-primary);font-size:14px;">1. 首页 <code>/</code></div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">店铺信息 + 日历选日期（绿/灰/不可点）</div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;">
+        <div style="font-weight:600;color:var(--text-primary);font-size:14px;">2. 预约表单 <code>/book?date=</code></div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">座位时间轴 → 选时间/时长/人数 → 填姓名 + 联系方式（微信或WA）→ 提交</div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;">
+        <div style="font-weight:600;color:var(--text-primary);font-size:14px;">3. 预约状态 <code>/booking/[id]</code></div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">预约详情 + 实时状态更新（待确认/已确认/已拒绝）</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div style="font-weight:600;color:#6366f1;margin-bottom:8px;">管理后台（需登录，移动端优先）</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;">
+        <div style="font-weight:600;color:var(--text-primary);font-size:14px;">预约列表 <code>/admin</code></div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">查看/确认/拒绝/取消 + 录入金额 + 实时通知</div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;">
+        <div style="font-weight:600;color:var(--text-primary);font-size:14px;">时间管理 <code>/admin/slots</code></div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">设置开放时间 + 批量设置一周 + 启用/停用</div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;">
+        <div style="font-weight:600;color:var(--text-primary);font-size:14px;">数据统计 <code>/admin/stats</code></div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">日/周/月人数 + 收入统计 + 趋势图表</div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;">
+        <div style="font-weight:600;color:var(--text-primary);font-size:14px;">登录 <code>/admin/login</code></div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;">邮箱 + 密码，Supabase Auth</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>预约流程</h3>
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">1</div>
+      <div style="color:var(--text-primary);font-size:14px;">店家后台设置可预约日期和时间范围</div>
+    </div>
+    <div style="width:2px;height:8px;background:var(--border);margin-left:12px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">2</div>
+      <div style="color:var(--text-primary);font-size:14px;">顾客打开 H5，日历显示实时可用日期</div>
+    </div>
+    <div style="width:2px;height:8px;background:var(--border);margin-left:12px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">3</div>
+      <div style="color:var(--text-primary);font-size:14px;">选日期 → 看时间轴 → 选时间/时长/人数 → 填信息 → 提交</div>
+    </div>
+    <div style="width:2px;height:8px;background:var(--border);margin-left:12px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">4</div>
+      <div style="color:var(--text-primary);font-size:14px;">系统冲突检测，通过后创建 pending 预约</div>
+    </div>
+    <div style="width:2px;height:8px;background:var(--border);margin-left:12px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">5</div>
+      <div style="color:var(--text-primary);font-size:14px;">店家收到通知，确认或拒绝</div>
+    </div>
+    <div style="width:2px;height:8px;background:var(--border);margin-left:12px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">6</div>
+      <div style="color:var(--text-primary);font-size:14px;">顾客实时看到预约状态</div>
+    </div>
+    <div style="width:2px;height:8px;background:var(--border);margin-left:12px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">7</div>
+      <div style="color:var(--text-primary);font-size:14px;">到店线下结算，店家录入收款金额</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>UI 设计风格</h3>
+  <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;">
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <div style="width:36px;height:36px;border-radius:6px;background:#D32F2F;border:1px solid rgba(0,0,0,0.1);" title="红色强调"></div>
+      <div style="width:36px;height:36px;border-radius:6px;background:#F5F0EB;border:1px solid rgba(0,0,0,0.1);" title="暖灰背景"></div>
+      <div style="width:36px;height:36px;border-radius:6px;background:#333333;border:1px solid rgba(0,0,0,0.1);" title="深色文字"></div>
+      <div style="width:36px;height:36px;border-radius:6px;background:#FFFFFF;border:1px solid rgba(0,0,0,0.1);" title="白色卡片"></div>
+    </div>
+    <div style="color:var(--text-primary);font-size:14px;line-height:1.8;">
+      像素风 · 可爱 · 活泼 · 简洁<br>
+      暖灰纹理背景 + 白色卡片 + 红色强调 + 像素装饰<br>
+      移动端优先：大按钮、大文字
+    </div>
+  </div>
+</div>
+
+<div class="options" style="margin-top:24px;">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>确认通过</h3>
+      <p>没问题，开始制定实施计划</p>
+    </div>
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>需要修改</h3>
+      <p>有些地方需要调整</p>
+    </div>
+  </div>
+</div>
