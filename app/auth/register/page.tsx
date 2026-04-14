@@ -58,8 +58,10 @@ function RegisterPage() {
       return;
     }
 
-    if (!signUpData.user) {
-      setError("注册失败，请稍后重试");
+    if (!signUpData.user || !signUpData.session) {
+      setError(
+        "注册失败，该邮箱可能已被注册。如已有账号请直接登录。"
+      );
       setSubmitting(false);
       return;
     }
@@ -74,7 +76,7 @@ function RegisterPage() {
     );
 
     if (profileError) {
-      setError("保存资料失败：" + profileError.message);
+      setError("保存资料失败，请稍后重试");
       setSubmitting(false);
       return;
     }
