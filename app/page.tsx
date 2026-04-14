@@ -1,65 +1,207 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase";
+import { getMYTHour, getMYTDateStr, getTodayMYT } from "@/lib/timezone";
+import type { AvailableSlot, Booking } from "@/lib/types";
+
+const TOTAL_SEATS = 4;
+
+export default function HomePage() {
+  const router = useRouter();
+  const [slots, setSlots] = useState<AvailableSlot[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    const supabase = createClient();
+
+    const [slotsRes, bookingsRes] = await Promise.all([
+      supabase.from("available_slots").select("*").eq("is_active", true),
+      supabase
+        .from("bookings")
+        .select("*")
+        .in("status", ["pending", "confirmed"]),
+    ]);
+
+    if (slotsRes.data) setSlots(slotsRes.data);
+    if (bookingsRes.data) setBookings(bookingsRes.data);
+    setLoading(false);
+  }
+
+  function getDateStatus(dateStr: string): "available" | "full" | "closed" {
+    const slot = slots.find((s) => s.date === dateStr);
+    if (!slot) return "closed";
+
+    const startHour = parseInt(slot.start_time.split(":")[0]);
+    const endHour = parseInt(slot.end_time.split(":")[0]);
+
+    const dayBookings = bookings.filter((b) => {
+      return getMYTDateStr(b.start_time) === dateStr;
+    });
+
+    for (let hour = startHour; hour < endHour; hour++) {
+      let seatsUsed = 0;
+      for (const b of dayBookings) {
+        const bHour = getMYTHour(b.start_time);
+        const bEnd = bHour + b.duration_hours;
+        if (hour >= bHour && hour < bEnd) {
+          seatsUsed += b.num_people;
+        }
+      }
+      if (seatsUsed < TOTAL_SEATS) return "available";
+    }
+
+    return "full";
+  }
+
+  function getDaysInMonth(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  }
+
+  function getFirstDayOfMonth(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  }
+
+  function formatDateStr(year: number, month: number, day: number) {
+    return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  }
+
+  function prevMonth() {
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
+    );
+  }
+
+  function nextMonth() {
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
+    );
+  }
+
+  const todayStr = getTodayMYT();
+
+  const daysInMonth = getDaysInMonth(currentMonth);
+  const firstDay = getFirstDayOfMonth(currentMonth);
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen px-4 py-6 max-w-md mx-auto">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <p className="text-sm text-muted-foreground tracking-widest mb-1">
+          SHERVIE ART
+        </p>
+        <h1 className="text-3xl font-bold text-foreground">拼豆岛</h1>
+        <p className="text-sm text-muted-foreground mt-1">PINSLAND</p>
+        <p className="text-xs text-muted-foreground mt-2">
+          JAYAONE | UM · Pacific Star
+        </p>
+      </div>
+
+      {/* Calendar */}
+      <div className="bg-card rounded-xl shadow-sm p-4">
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={prevMonth}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            ←
+          </button>
+          <h2 className="text-lg font-semibold">
+            {year}年{month + 1}月
+          </h2>
+          <button
+            onClick={nextMonth}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
           >
-            Documentation
-          </a>
+            →
+          </button>
         </div>
-      </main>
+
+        {/* Week header */}
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {weekDays.map((d) => (
+            <div
+              key={d}
+              className="text-center text-xs font-medium text-muted-foreground py-1"
+            >
+              {d}
+            </div>
+          ))}
+        </div>
+
+        {/* Days */}
+        {loading ? (
+          <div className="text-center py-8 text-muted-foreground">
+            加载中...
+          </div>
+        ) : (
+          <div className="grid grid-cols-7 gap-1">
+            {Array.from({ length: firstDay }).map((_, i) => (
+              <div key={`empty-${i}`} className="h-10" />
+            ))}
+
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1;
+              const dateStr = formatDateStr(year, month, day);
+              const isPast = dateStr < todayStr;
+              const status = isPast ? "closed" : getDateStatus(dateStr);
+
+              return (
+                <button
+                  key={day}
+                  disabled={status === "closed" || status === "full"}
+                  onClick={() => router.push(`/book?date=${dateStr}`)}
+                  className={`h-10 rounded-lg text-sm font-medium transition-all ${
+                    status === "available"
+                      ? "bg-green-100 text-green-800 hover:bg-green-200 active:scale-95 cursor-pointer"
+                      : status === "full"
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : "text-gray-300 cursor-not-allowed"
+                  } ${dateStr === todayStr ? "ring-2 ring-primary" : ""}`}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Legend */}
+        <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded bg-green-100 border border-green-300" />
+            <span>可预约</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded bg-gray-200" />
+            <span>已满</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded border border-gray-200" />
+            <span>未开放</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="text-center mt-6 text-xs text-muted-foreground">
+        <p>自助体验 · 提供拼豆工具 + 221色豆子</p>
+        <p className="mt-1">成品带走 · 配件升级 FROM 1RM起</p>
+      </div>
     </div>
   );
 }
