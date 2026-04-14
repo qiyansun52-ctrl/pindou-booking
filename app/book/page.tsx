@@ -41,11 +41,11 @@ function BookPage() {
   const [startHour, setStartHour] = useState<number | null>(null);
   const [duration, setDuration] = useState(1);
   const [numPeople, setNumPeople] = useState(1);
-  const [customerName, setCustomerName] = useState("");
-  const [contactType, setContactType] = useState<"wechat" | "whatsapp">(
-    "whatsapp"
-  );
-  const [contactValue, setContactValue] = useState("");
+  const [profile, setProfile] = useState<{
+    name: string;
+    contact_type: "wechat" | "whatsapp";
+    contact_value: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!date) return;
@@ -54,6 +54,23 @@ function BookPage() {
 
   async function fetchSlotData() {
     const supabase = createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.replace(`/auth/login?from=${encodeURIComponent(`/book?date=${date}`)}`);
+      return;
+    }
+
+    const { data: profileData } = await supabase
+      .from("user_profiles")
+      .select("name, contact_type, contact_value")
+      .eq("id", user.id)
+      .single();
+
+    if (profileData) setProfile(profileData);
 
     const { data: slotData } = await supabase
       .from("available_slots")
@@ -65,13 +82,14 @@ function BookPage() {
     if (slotData) {
       setSlot(slotData);
 
-      const { data: bookingData } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("slot_id", slotData.id)
-        .in("status", ["pending", "confirmed"]);
-
-      if (bookingData) setBookings(bookingData);
+      const { data: occupancyData } = await supabase.rpc("get_occupancy");
+      if (occupancyData) {
+        setBookings(
+          occupancyData.filter(
+            (b: Booking) => b.slot_id === slotData.id
+          ) as Booking[]
+        );
+      }
     }
 
     setLoading(false);
@@ -115,9 +133,6 @@ function BookPage() {
           start_hour: startHour,
           duration_hours: duration,
           num_people: numPeople,
-          customer_name: customerName,
-          contact_type: contactType,
-          contact_value: contactValue,
         }),
       });
 
@@ -295,56 +310,20 @@ function BookPage() {
         </Card>
       )}
 
-      {/* Contact Info */}
-      {startHour !== null && (
-        <Card className="p-4 mb-4">
+      {/* Contact Info (from profile) */}
+      {startHour !== null && profile && (
+        <Card className="p-4 mb-4 bg-muted/30">
           <h2 className="text-sm font-semibold mb-3">联系信息</h2>
-          <div className="space-y-3">
-            <div>
-              <Label htmlFor="name" className="text-sm mb-1 block">
-                姓名
-              </Label>
-              <Input
-                id="name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="请输入您的姓名"
-              />
+          <div className="text-sm space-y-1">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">姓名</span>
+              <span className="font-medium">{profile.name}</span>
             </div>
-
-            <div>
-              <Label className="text-sm mb-2 block">联系方式</Label>
-              <div className="flex gap-2 mb-2">
-                <button
-                  onClick={() => setContactType("whatsapp")}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                    contactType === "whatsapp"
-                      ? "bg-green-600 text-white"
-                      : "bg-muted hover:bg-muted/80"
-                  }`}
-                >
-                  WhatsApp
-                </button>
-                <button
-                  onClick={() => setContactType("wechat")}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                    contactType === "wechat"
-                      ? "bg-green-600 text-white"
-                      : "bg-muted hover:bg-muted/80"
-                  }`}
-                >
-                  微信
-                </button>
-              </div>
-              <Input
-                value={contactValue}
-                onChange={(e) => setContactValue(e.target.value)}
-                placeholder={
-                  contactType === "whatsapp"
-                    ? "请输入 WhatsApp 号码"
-                    : "请输入微信号"
-                }
-              />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">
+                {profile.contact_type === "whatsapp" ? "WhatsApp" : "微信"}
+              </span>
+              <span className="font-medium">{profile.contact_value}</span>
             </div>
           </div>
         </Card>
@@ -389,7 +368,7 @@ function BookPage() {
 
           <Button
             onClick={handleSubmit}
-            disabled={submitting || !customerName || !contactValue}
+            disabled={submitting || !profile}
             className="w-full h-12 text-base font-semibold"
           >
             {submitting ? "提交中..." : "确认预约"}

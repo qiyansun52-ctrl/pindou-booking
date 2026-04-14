@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { getMYTHour, getMYTDateStr, getTodayMYT } from "@/lib/timezone";
 import type { AvailableSlot, Booking } from "@/lib/types";
@@ -17,24 +18,40 @@ export default function HomePage() {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     fetchData();
+    checkAuth();
   }, []);
+
+  async function checkAuth() {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("name")
+        .eq("id", user.id)
+        .single();
+      setUserName(profile?.name || null);
+    }
+    setAuthChecked(true);
+  }
 
   async function fetchData() {
     const supabase = createClient();
 
-    const [slotsRes, bookingsRes] = await Promise.all([
+    const [slotsRes, occupancyRes] = await Promise.all([
       supabase.from("available_slots").select("*").eq("is_active", true),
-      supabase
-        .from("bookings")
-        .select("*")
-        .in("status", ["pending", "confirmed"]),
+      supabase.rpc("get_occupancy"),
     ]);
 
     if (slotsRes.data) setSlots(slotsRes.data);
-    if (bookingsRes.data) setBookings(bookingsRes.data);
+    if (occupancyRes.data) setBookings(occupancyRes.data as Booking[]);
     setLoading(false);
   }
 
@@ -99,6 +116,31 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen px-4 py-6 max-w-md mx-auto">
+      {/* Auth nav */}
+      <div className="flex justify-end items-center gap-3 text-xs mb-3 h-5">
+        {authChecked && userName && (
+          <>
+            <Link href="/my-bookings" className="text-primary font-medium">
+              我的预约
+            </Link>
+            <span className="text-muted-foreground">|</span>
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                退出（{userName}）
+              </button>
+            </form>
+          </>
+        )}
+        {authChecked && !userName && (
+          <Link href="/auth/login" className="text-primary font-medium">
+            登录 / 注册
+          </Link>
+        )}
+      </div>
+
       {/* Header */}
       <div className="text-center mb-6">
         <p className="text-sm text-muted-foreground tracking-widest mb-1">

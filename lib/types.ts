@@ -12,6 +12,7 @@ export interface AvailableSlot {
 export interface Booking {
   id: string;
   slot_id: string;
+  user_id: string;
   customer_name: string;
   contact_type: ContactType;
   contact_value: string;
@@ -22,6 +23,14 @@ export interface Booking {
   status: BookingStatus;
   created_at: string;
   available_slots?: AvailableSlot;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  contact_type: ContactType;
+  contact_value: string;
+  created_at: string;
 }
 
 export interface CreateBookingInput {

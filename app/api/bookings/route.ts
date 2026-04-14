@@ -8,26 +8,23 @@ const TOTAL_SEATS = 4;
 export async function POST(request: NextRequest) {
   const supabase = await createServerSupabaseClient();
 
-  const body = await request.json();
   const {
-    date,
-    start_hour,
-    duration_hours,
-    num_people,
-    customer_name,
-    contact_type,
-    contact_value,
-  } = body;
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "请先登录" }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { date, start_hour, duration_hours, num_people } = body;
 
   // Validate input
   if (
     !date ||
     start_hour === undefined ||
     !duration_hours ||
-    !num_people ||
-    !customer_name ||
-    !contact_type ||
-    !contact_value
+    !num_people
   ) {
     return NextResponse.json({ error: "请填写所有必填项" }, { status: 400 });
   }
@@ -46,9 +43,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!["wechat", "whatsapp"].includes(contact_type)) {
+  // Read user's profile for name/contact
+  const { data: profile, error: profileError } = await supabase
+    .from("user_profiles")
+    .select("name, contact_type, contact_value")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile) {
     return NextResponse.json(
-      { error: "联系方式类型无效" },
+      { error: "请先完善个人资料" },
       { status: 400 }
     );
   }
@@ -79,13 +83,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Duplicate check: same name + contact + date + time within last 5 minutes
+  // Duplicate check: same user + date + within last 5 minutes
   const { data: recentDuplicates } = await supabase
     .from("bookings")
     .select("id")
     .eq("slot_id", slot.id)
-    .eq("customer_name", customer_name)
-    .eq("contact_value", contact_value)
+    .eq("user_id", user.id)
     .in("status", ["pending", "confirmed"])
     .gte("created_at", new Date(Date.now() - 5 * 60 * 1000).toISOString());
 
@@ -96,16 +99,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Conflict detection: check seat availability for each hour
-  const { data: existingBookings } = await supabase
-    .from("bookings")
-    .select("*")
-    .eq("slot_id", slot.id)
-    .in("status", ["pending", "confirmed"]);
+  // Conflict detection via occupancy RPC (avoids RLS exposing others' PII)
+  const { data: occupancy } = await supabase.rpc("get_occupancy");
+  const slotOccupancy = (occupancy || []).filter(
+    (b: { slot_id: string }) => b.slot_id === slot.id
+  );
 
   for (let hour = start_hour; hour < start_hour + duration_hours; hour++) {
     let seatsUsed = 0;
-    for (const b of existingBookings || []) {
+    for (const b of slotOccupancy) {
       const bHour = getMYTHour(b.start_time);
       const bEnd = bHour + b.duration_hours;
       if (hour >= bHour && hour < bEnd) {
@@ -129,9 +131,10 @@ export async function POST(request: NextRequest) {
     .from("bookings")
     .insert({
       slot_id: slot.id,
-      customer_name,
-      contact_type,
-      contact_value,
+      user_id: user.id,
+      customer_name: profile.name,
+      contact_type: profile.contact_type,
+      contact_value: profile.contact_value,
       start_time: startTimeISO,
       duration_hours,
       num_people,
@@ -149,9 +152,9 @@ export async function POST(request: NextRequest) {
 
   // Send notification email (non-blocking)
   notifyNewBooking({
-    customer_name,
-    contact_type,
-    contact_value,
+    customer_name: profile.name,
+    contact_type: profile.contact_type,
+    contact_value: profile.contact_value,
     date,
     start_hour,
     duration_hours,
