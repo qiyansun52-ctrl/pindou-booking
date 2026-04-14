@@ -1,12 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const ADMIN_PROTECTED = (path: string) =>
+  path.startsWith("/admin") && path !== "/admin/login";
+
+const CUSTOMER_PROTECTED = (path: string) =>
+  path === "/book" || path.startsWith("/my-bookings");
+
 export async function proxy(request: NextRequest) {
-  // Only protect /admin routes (except /admin/login)
-  if (
-    !request.nextUrl.pathname.startsWith("/admin") ||
-    request.nextUrl.pathname === "/admin/login"
-  ) {
+  const path = request.nextUrl.pathname;
+  const isAdminPath = ADMIN_PROTECTED(path);
+  const isCustomerPath = CUSTOMER_PROTECTED(path);
+
+  if (!isAdminPath && !isCustomerPath) {
     return NextResponse.next();
   }
 
@@ -21,7 +27,7 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({ request });
@@ -39,7 +45,14 @@ export async function proxy(request: NextRequest) {
 
   if (!user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
+    const from = path + (request.nextUrl.search || "");
+    url.search = "";
+    if (isAdminPath) {
+      url.pathname = "/admin/login";
+    } else {
+      url.pathname = "/auth/login";
+      url.searchParams.set("from", from);
+    }
     return NextResponse.redirect(url);
   }
 
@@ -47,5 +60,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/book", "/my-bookings/:path*"],
 };
