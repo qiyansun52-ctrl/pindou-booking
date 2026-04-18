@@ -53,46 +53,50 @@ function BookPage() {
   }, [date]);
 
   async function fetchSlotData() {
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      router.replace(`/auth/login?from=${encodeURIComponent(`/book?date=${date}`)}`);
-      return;
-    }
-
-    const { data: profileData } = await supabase
-      .from("user_profiles")
-      .select("name, contact_type, contact_value")
-      .eq("id", user.id)
-      .single();
-
-    if (profileData) setProfile(profileData);
-
-    const { data: slotData } = await supabase
-      .from("available_slots")
-      .select("*")
-      .eq("date", date)
-      .eq("is_active", true)
-      .single();
-
-    if (slotData) {
-      setSlot(slotData);
-
-      const { data: occupancyData } = await supabase.rpc("get_occupancy");
-      if (occupancyData) {
-        setBookings(
-          occupancyData.filter(
-            (b: Booking) => b.slot_id === slotData.id
-          ) as Booking[]
-        );
+      if (!user) {
+        router.replace(`/auth/login?from=${encodeURIComponent(`/book?date=${date}`)}`);
+        return;
       }
-    }
 
-    setLoading(false);
+      const { data: profileData } = await supabase
+        .from("user_profiles")
+        .select("name, contact_type, contact_value")
+        .eq("id", user.id)
+        .single();
+
+      if (profileData) setProfile(profileData);
+
+      const { data: slotData } = await supabase
+        .from("available_slots")
+        .select("*")
+        .eq("date", date)
+        .eq("is_active", true)
+        .single();
+
+      if (slotData) {
+        setSlot(slotData);
+
+        const { data: occupancyData } = await supabase.rpc("get_occupancy");
+        if (occupancyData) {
+          setBookings(
+            occupancyData.filter(
+              (b: Booking) => b.slot_id === slotData.id
+            ) as Booking[]
+          );
+        }
+      }
+    } catch {
+      // fetch failed, show "date not available"
+    } finally {
+      setLoading(false);
+    }
   }
 
   function getSeatsUsedAtHour(hour: number): number {

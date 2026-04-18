@@ -56,6 +56,21 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (isAdminPath) {
+    const { data: adminRecord } = await supabase
+      .from("admin_users")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (!adminRecord) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/login";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return supabaseResponse;
 }
 

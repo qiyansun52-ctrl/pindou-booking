@@ -83,12 +83,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Duplicate check: same user + date + within last 5 minutes
+  // Duplicate check: same user + same start time + within last 5 minutes
+  const startTimeISO = toMYTISOString(date, start_hour);
   const { data: recentDuplicates } = await supabase
     .from("bookings")
     .select("id")
     .eq("slot_id", slot.id)
     .eq("user_id", user.id)
+    .eq("start_time", startTimeISO)
     .in("status", ["pending", "confirmed"])
     .gte("created_at", new Date(Date.now() - 5 * 60 * 1000).toISOString());
 
@@ -123,9 +125,6 @@ export async function POST(request: NextRequest) {
       );
     }
   }
-
-  // Create the booking with Malaysia timezone
-  const startTimeISO = toMYTISOString(date, start_hour);
 
   const { data: booking, error: insertError } = await supabase
     .from("bookings")

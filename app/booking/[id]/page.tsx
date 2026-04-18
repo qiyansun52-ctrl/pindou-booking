@@ -40,8 +40,9 @@ export default function BookingStatusPage() {
       .single()
       .then(({ data }) => {
         if (data) setBooking(data);
-        setLoading(false);
-      });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
 
     // Realtime subscription
     const channel = supabase

@@ -27,32 +27,42 @@ export default function HomePage() {
   }, []);
 
   async function checkAuth() {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("name")
-        .eq("id", user.id)
-        .single();
-      setUserName(profile?.name || null);
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("name")
+          .eq("id", user.id)
+          .single();
+        setUserName(profile?.name || null);
+      }
+    } catch {
+      // auth check failed, treat as unauthenticated
+    } finally {
+      setAuthChecked(true);
     }
-    setAuthChecked(true);
   }
 
   async function fetchData() {
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const [slotsRes, occupancyRes] = await Promise.all([
-      supabase.from("available_slots").select("*").eq("is_active", true),
-      supabase.rpc("get_occupancy"),
-    ]);
+      const [slotsRes, occupancyRes] = await Promise.all([
+        supabase.from("available_slots").select("*").eq("is_active", true),
+        supabase.rpc("get_occupancy"),
+      ]);
 
-    if (slotsRes.data) setSlots(slotsRes.data);
-    if (occupancyRes.data) setBookings(occupancyRes.data as Booking[]);
-    setLoading(false);
+      if (slotsRes.data) setSlots(slotsRes.data);
+      if (occupancyRes.data) setBookings(occupancyRes.data as Booking[]);
+    } catch {
+      // fetch failed, show empty calendar
+    } finally {
+      setLoading(false);
+    }
   }
 
   function getDateStatus(dateStr: string): "available" | "full" | "closed" {
