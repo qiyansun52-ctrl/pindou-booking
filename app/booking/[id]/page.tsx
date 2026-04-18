@@ -33,16 +33,20 @@ export default function BookingStatusPage() {
     const supabase = createClient();
 
     // Initial fetch
-    supabase
-      .from("bookings")
-      .select("*")
-      .eq("id", id)
-      .single()
-      .then(({ data }) => {
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("bookings")
+          .select("*")
+          .eq("id", id)
+          .single();
         if (data) setBooking(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      } catch {
+        // fetch failed, show "not found"
+      } finally {
+        setLoading(false);
+      }
+    })();
 
     // Realtime subscription
     const channel = supabase
