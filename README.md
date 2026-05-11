@@ -47,10 +47,6 @@ The system replaces this with a public mobile-first calendar, server-side hourly
 - **Resend** email to the admin on every new booking (optional, env-gated).
 - Browser push for the admin while the dashboard is open.
 
-## Demo / Screenshots · 演示
-
-> Deployed preview + screenshots TBD. `[ Calendar view ]   [ Hour picker ]   [ Admin dashboard ]`
-
 ## Tech stack · 技术栈
 
 | Layer | Choice |
